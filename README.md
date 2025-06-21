@@ -8,7 +8,11 @@ other models.
 
 # example
 
-todo
+
+
+https://github.com/user-attachments/assets/7d6fc38b-3db8-4ef3-9bed-4fc660919f65
+
+
 
 # requirements
 
