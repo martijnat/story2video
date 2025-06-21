@@ -10,7 +10,7 @@ Original file is located at
 Pip requirements
 """
 
-#!pip install diffusers chatterbox-tts transformers accelerate torchaudio ffmpeg-python
+#!pip install diffusers chatterbox-tts transformers accelerate torchaudio ffmpeg-python bitsandbytes sentencepiece
 #!pip uninstall -y diffusers
 #!pip install diffusers
 
@@ -75,7 +75,10 @@ import torchaudio as ta
 import ffmpeg
 from chatterbox.tts import ChatterboxTTS
 from diffusers import DiffusionPipeline
-#from diffusers import FluxPipeline
+from diffusers import FluxPipeline
+from diffusers import BitsAndBytesConfig as DiffusersBitsAndBytesConfig, FluxTransformer2DModel, FluxPipeline
+from transformers import BitsAndBytesConfig as BitsAndBytesConfig, T5EncoderModel
+
 from transformers import T5EncoderModel, BitsAndBytesConfig
 lines = [line.strip() for line in story.split("\n") if line.strip()]
 lines = [line for line in lines if len(line)>0] # remove empty lines.
@@ -85,7 +88,7 @@ device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is
 print(f"Using device: {device}")
 
 """Functions"""
-"""
+
 def generate_images_lowvram(lines):
     print("Loading FLUX...")
     #ckpt_id = "black-forest-labs/FLUX.1-dev"
@@ -103,34 +106,6 @@ def generate_images_lowvram(lines):
         #image = pipe(prompt=prompt, height=768,width=1360, max_sequence_length=512, generator=torch.Generator("cpu").manual_seed(0)).images[0]
         image = pipe(prompt=prompt, guidance_scale=0.0, num_inference_steps=4, height=768,width=1360, max_sequence_length=512, generator=torch.Generator("cpu").manual_seed(0)).images[0]
         image.save(image_file)
-"""
-def generate_images_lowvram(lines):
-    print("Loading FLUX...")
-    #ckpt_id = "black-forest-labs/FLUX.1-dev"
-    ckpt_id = "black-forest-labs/FLUX.1-schnell"
-
-    quantization_config = BitsAndBytesConfig(load_in_8bit=True)
-    text_encoder = T5EncoderModel.from_pretrained(
-      ckpt_id,
-      subfolder="text_encoder_2",
-      quantization_config=quantization_config,
-      torch_dtype=torch.bfloat16
-    )
-    pipe = DiffusionPipeline.from_pretrained(ckpt_id, torch_dtype=torch.bfloat16, text_encoder_2=text_encoder,
-        device_map="balanced", max_memory={0:"11GiB", "cpu":"11GiB"})
-    pipe.vae.enable_tiling()
-    #pipe.vae.enable_slicing()
-    #pipe.enable_model_cpu_offload()
-    #pipe.enable_sequential_cpu_offload() # offloads modules to CPU on a submodule level (rather than model level)
-    for idx, line in enumerate(lines):
-        print(f"Generating image for line {idx+1}/{len(lines)}: {line[:50]}...")
-        # Generate image.
-        image_file = f"line-{idx:04d}.png"
-        prompt = "Children's book illustration for the following text: " + line
-        #image = pipe(prompt=prompt, height=768,width=1360, max_sequence_length=512, generator=torch.Generator("cpu").manual_seed(0)).images[0]
-        image = pipe(prompt=prompt, guidance_scale=0.0, num_inference_steps=4, height=768,width=1360, max_sequence_length=256, generator=torch.Generator("cpu").manual_seed(0)).images[0]
-        image.save(image_file)
-
 
 def generate_voices(lines):
     # Load models
