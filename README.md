@@ -8,10 +8,12 @@ other models.
 
 # examples
 
-[chroma_preview1.webm](https://github.com/user-attachments/assets/fbb98c8e-2105-40a3-85b1-3c780bdec4e0)
-
 
 https://github.com/user-attachments/assets/7d6fc38b-3db8-4ef3-9bed-4fc660919f65
+
+
+https://github.com/user-attachments/assets/fbb98c8e-2105-40a3-85b1-3c780bdec4e0
+
 
 
 
